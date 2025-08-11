@@ -1,8 +1,18 @@
 import React from 'react'
 
-const DefaultLayout = () => {
+const DefaultLayout = (props) => {
   return (
-    <div>DefaultLayout</div>
+    <div className='layout'>
+        <div className="header">
+            <div>
+                <h1 className="logo">EMARH MONEY</h1>
+            </div>
+        </div>
+        <div className="content">
+            {props.children}
+        </div>
+    </div>
+
   )
 }
 
