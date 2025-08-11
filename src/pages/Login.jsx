@@ -1,8 +1,11 @@
 import React from 'react'
+import DefaultLayout from '../components/DefaultLayout';
 
 const Login = () => {
   return (
-    <div>Login</div>
+    <DefaultLayout>
+        <h1>Login</h1>
+    </DefaultLayout>
   )
 }
 
