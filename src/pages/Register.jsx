@@ -2,7 +2,9 @@ import React from 'react';
 
 const Register = () => {
   return (
-    <div>Register</div>
+    <DefaultLayout>
+        <h1>Register</h1>
+    </DefaultLayout>
   )
 }
 
