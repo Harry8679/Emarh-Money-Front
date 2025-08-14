@@ -3,6 +3,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import DefaultLayout from "../components/DefaultLayout";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -42,91 +43,107 @@ const RegisterPage = () => {
 
   return (
     <DefaultLayout>
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-gray-100 md:flex-row">
         <ToastContainer />
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg"
-        >
-          <h2 className="mb-4 text-2xl font-bold text-center text-blue-600">
-            Inscription
-          </h2>
 
-          {/* Email */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-              placeholder="Entrez votre email"
-            />
-          </div>
+        {/* Animation Lottie */}
+        <div className="flex items-center justify-center w-full md:w-1/2">
+          <DotLottieReact
+            src="https://lottie.host/c939432c-648a-4340-b8b2-3f5e678f6dc3/1NnAB3RSea.lottie"
+            loop
+            autoplay
+            style={{ width: "100%", maxWidth: "400px", height: "auto" }}
+          />
+        </div>
 
-          {/* Mot de passe */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Mot de passe</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                placeholder="Entrez votre mot de passe"
-              />
-              <span
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute text-gray-500 cursor-pointer right-3 top-3 hover:text-gray-700"
-              >
-                {showPassword ? "🙈" : "👁️"}
-              </span>
-            </div>
-          </div>
-
-          {/* Confirmation mot de passe */}
-          <div className="mb-4">
-            <label className="block text-gray-700">Confirmez le mot de passe</label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
-                placeholder="Confirmez votre mot de passe"
-              />
-              <span
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute text-gray-500 cursor-pointer right-3 top-3 hover:text-gray-700"
-              >
-                {showConfirmPassword ? "🙈" : "👁️"}
-              </span>
-            </div>
-          </div>
-
-          {/* Bouton */}
-          <button
-            type="submit"
-            className="w-full py-2 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
+        {/* Formulaire */}
+        <div className="flex items-center justify-center w-full md:w-1/2">
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-md p-6 bg-white rounded-lg shadow-lg"
           >
-            S'inscrire
-          </button>
+            <h2 className="mb-4 text-2xl font-bold text-center text-blue-600">
+              Inscription
+            </h2>
 
-          {/* Lien vers connexion */}
-          <p className="mt-4 text-sm text-center text-gray-600">
-            Vous avez déjà un compte ?{" "}
+            {/* Email */}
+            <div className="mb-4">
+              <label className="block text-gray-700">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                placeholder="Entrez votre email"
+              />
+            </div>
+
+            {/* Mot de passe */}
+            <div className="mb-4">
+              <label className="block text-gray-700">Mot de passe</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                  placeholder="Entrez votre mot de passe"
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute text-gray-500 cursor-pointer right-3 top-3 hover:text-gray-700"
+                >
+                  {showPassword ? "🙈" : "👁️"}
+                </span>
+              </div>
+            </div>
+
+            {/* Confirmation mot de passe */}
+            <div className="mb-4">
+              <label className="block text-gray-700">
+                Confirmez le mot de passe
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 mt-1 border rounded-lg focus:outline-none focus:ring focus:ring-blue-300"
+                  placeholder="Confirmez votre mot de passe"
+                />
+                <span
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute text-gray-500 cursor-pointer right-3 top-3 hover:text-gray-700"
+                >
+                  {showConfirmPassword ? "🙈" : "👁️"}
+                </span>
+              </div>
+            </div>
+
+            {/* Bouton */}
             <button
-              type="button"
-              onClick={() => navigate("/connexion")}
-              className="text-blue-600 hover:underline"
+              type="submit"
+              className="w-full py-2 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
             >
-              Connectez-vous
+              S'inscrire
             </button>
-          </p>
-        </form>
+
+            {/* Lien vers connexion */}
+            <p className="mt-4 text-sm text-center text-gray-600">
+              Vous avez déjà un compte ?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/connexion")}
+                className="text-blue-600 hover:underline"
+              >
+                Connectez-vous
+              </button>
+            </p>
+          </form>
+        </div>
       </div>
     </DefaultLayout>
   );
