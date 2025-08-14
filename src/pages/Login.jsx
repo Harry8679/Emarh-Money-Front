@@ -1,10 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { toast, ToastContainer } from 'react-toastify';
 import DefaultLayout from '../components/DefaultLayout';
 
 const Login = () => {
+  const [form, setForm] = useState({
+    email: '',
+    password: '',
+  });
+
+  
   return (
     <DefaultLayout>
-        <h1>Login</h1>
+        
     </DefaultLayout>
   )
 }
