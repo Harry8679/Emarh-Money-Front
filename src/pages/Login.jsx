@@ -59,6 +59,13 @@ const Login = () => {
                   </span>
               </div>
             </div>
+            {/* Bouton */}
+            <button
+              type="submit"
+              className="w-full py-2 text-white transition bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              Se connecter
+            </button>
           </form>
         </div>
     </DefaultLayout>
