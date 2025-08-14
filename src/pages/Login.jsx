@@ -10,6 +10,10 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const handleChange = e => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   
   return (
     <DefaultLayout>
