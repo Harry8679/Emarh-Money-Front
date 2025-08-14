@@ -29,7 +29,7 @@ const DefaultLayout = ({ children }) => {
               <li className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => navigate('/inscription')}>
                 Inscription
               </li>
-              <li className="px-4 py-2 cursor-pointer hover:bg-gray-100">
+              <li className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => navigate('/connexion')}>
                 Connexion
               </li>
             </ul>
