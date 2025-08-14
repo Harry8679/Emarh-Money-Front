@@ -31,7 +31,12 @@ const Login = () => {
   };
   return (
     <DefaultLayout>
-        
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+          <ToastContainer />
+          <form onSubmit={handleSubmit} className='w-full max-w-md p-6 bg-white rounded-lg shadow-lg'>
+            <h2 className="mb-4 text-2xl font-bold text-center text-blue-600">Connexion</h2>
+          </form>
+        </div>
     </DefaultLayout>
   )
 }
