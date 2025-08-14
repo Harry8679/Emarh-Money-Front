@@ -45,7 +45,7 @@ const Login = () => {
             src="https://lottie.host/6d50dda5-06e4-4787-9e31-7bd2cb31e9b5/YTMPTEIYO5.lottie"
             loop
             autoplay
-            style={{ width: '100%', maxWidth: '400px', height: 'auto' }}
+            style={{ width: '100%', maxWidth: '1000px', height: 'auto' }}
           />
         </div>
 
