@@ -52,7 +52,7 @@ const RegisterPage = () => {
             src="https://lottie.host/c939432c-648a-4340-b8b2-3f5e678f6dc3/1NnAB3RSea.lottie"
             loop
             autoplay
-            style={{ width: "100%", maxWidth: "400px", height: "auto" }}
+            style={{ width: "100%", maxWidth: "1000px", height: "auto" }}
           />
         </div>
 
