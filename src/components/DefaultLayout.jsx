@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from 'react-router-dom';
 
 const DefaultLayout = ({ children }) => {
   const prenom = "John";
   const nom = "Doe";
   const initials = `${prenom[0]}${nom[0]}`.toUpperCase();
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -24,7 +26,7 @@ const DefaultLayout = ({ children }) => {
           {/* Menu déroulant */}
           <div className="absolute right-0 invisible w-40 mt-2 transition-all duration-200 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-hover:visible">
             <ul className="py-2 text-gray-700">
-              <li className="px-4 py-2 cursor-pointer hover:bg-gray-100">
+              <li className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => navigate('/inscription')}>
                 Inscription
               </li>
               <li className="px-4 py-2 cursor-pointer hover:bg-gray-100">
