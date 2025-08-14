@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
 import DefaultLayout from "../components/DefaultLayout";
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -34,7 +36,6 @@ const RegisterPage = () => {
       return;
     }
 
-    // Si tout est OK
     toast.success("Inscription réussie !");
     console.log("Formulaire envoyé :", form);
   };
@@ -113,6 +114,18 @@ const RegisterPage = () => {
           >
             S'inscrire
           </button>
+
+          {/* Lien vers connexion */}
+          <p className="mt-4 text-sm text-center text-gray-600">
+            Vous avez déjà un compte ?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/connexion")}
+              className="text-blue-600 hover:underline"
+            >
+              Connectez-vous
+            </button>
+          </p>
         </form>
       </div>
     </DefaultLayout>
