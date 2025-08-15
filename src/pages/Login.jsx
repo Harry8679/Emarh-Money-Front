@@ -17,21 +17,44 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.email || !form.password) {
-      toast.error('Veuillez remplir tous les champs !');
+      toast.error("Veuillez remplir tous les champs !");
       return;
     }
 
     if (form.password.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères.');
+      toast.error("Le mot de passe doit contenir au moins 6 caractères.");
       return;
     }
 
-    toast.success('Connexion réussie !');
-    console.log('Formulaire envoyé : ', form);
+    try {
+      const res = await fetch("http://localhost:5000/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Erreur lors de la connexion");
+        return;
+      }
+
+      // Stockage du token dans localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data));
+
+      toast.success("Connexion réussie !");
+      navigate("/dashboard"); // Redirection
+    } catch (error) {
+      toast.error("Erreur serveur");
+    }
   };
 
   return (
