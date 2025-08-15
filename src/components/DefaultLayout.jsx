@@ -12,7 +12,12 @@ const DefaultLayout = ({ children }) => {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
         {/* Logo à gauche */}
-        <h1 className="text-xl font-bold text-blue-600">EMARH Money</h1>
+        <h1
+          className="text-xl font-bold text-blue-600 cursor-pointer hover:opacity-80"
+          onClick={() => navigate('/')} // Redirection vers page d'accueil
+        >
+          EMARH Money
+        </h1>
 
         {/* Avatar + Menu à droite */}
         <div className="relative group">
@@ -26,10 +31,16 @@ const DefaultLayout = ({ children }) => {
           {/* Menu déroulant */}
           <div className="absolute right-0 invisible w-40 mt-2 transition-all duration-200 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 group-hover:visible">
             <ul className="py-2 text-gray-700">
-              <li className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => navigate('/inscription')}>
+              <li
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => navigate('/inscription')}
+              >
                 Inscription
               </li>
-              <li className="px-4 py-2 cursor-pointer hover:bg-gray-100" onClick={() => navigate('/connexion')}>
+              <li
+                className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => navigate('/connexion')}
+              >
                 Connexion
               </li>
             </ul>
