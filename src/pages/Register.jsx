@@ -21,10 +21,10 @@ const RegisterPage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.email || !form.password || !form.confirmPassword) {
+    if (!form.firstName || !form.lastName || !form.email || !form.password || !form.confirmPassword) {
       toast.error("Veuillez remplir tous les champs !");
       return;
     }
@@ -39,8 +39,35 @@ const RegisterPage = () => {
       return;
     }
 
-    toast.success("Inscription réussie !");
-    console.log("Formulaire envoyé :", form);
+    try {
+      const res = await fetch("http://localhost:5000/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName: form.lastName,
+          email: form.email,
+          password: form.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Erreur lors de l'inscription");
+        return;
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data));
+
+      toast.success("Inscription réussie !");
+      navigate("/dashboard");
+    } catch (error) {
+      toast.error("Erreur serveur");
+    }
   };
 
   return (
