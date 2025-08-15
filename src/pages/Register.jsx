@@ -8,6 +8,8 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
