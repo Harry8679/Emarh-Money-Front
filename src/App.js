@@ -1,22 +1,27 @@
-// import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <div className="App">
+    <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/inscription' element={<Register />} />
-          <Route path='/connexion' element={<Login />} />
-          <Route path='/' element={<Home />} />
+          {/* Routes publiques accessibles seulement si NON connecté */}
+          <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+          <Route path="/inscription" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/connexion" element={<PublicRoute><Login /></PublicRoute>} />
+
+          {/* Routes privées accessibles seulement si connecté */}
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </AuthProvider>
   );
 }
 
