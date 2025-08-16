@@ -1,21 +1,79 @@
 // src/pages/Dashboard.jsx
 import React, { useState } from "react";
 import { FaList, FaChartPie, FaPlus } from "react-icons/fa";
-import { Progress, Select, Modal } from "antd"; // ⬅️ ajout de Modal
+import {
+  Progress,
+  Select,
+  Modal,
+  Form,
+  Input,
+  DatePicker,
+} from "antd";
 import DefaultLayout from "../components/DefaultLayout";
+
+const { TextArea } = Input;
 
 const Dashboard = () => {
   const [frequence, setFrequence] = useState("7j");
   const [type, setType] = useState("all");
 
-  // État du modal
+  // Modal + Form state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [form] = Form.useForm();
+
   const openModal = () => setIsModalOpen(true);
-  const handleCancel = () => setIsModalOpen(false);
-  const handleOk = () => {
-    // TODO: envoyer la nouvelle transaction au backend ici
-    // ex: await fetch('/api/transactions', { method:'POST', body: JSON.stringify(payload) })
+  const handleCancel = () => {
     setIsModalOpen(false);
+    form.resetFields();
+  };
+
+  // Soumission du formulaire (clic sur "Valider")
+  const onFinish = async (values) => {
+    // Adapter ici le mapping pour ton backend
+    const payload = {
+      montant: values.montant,                       // string (texte)
+      type: values.type,                             // "entree" | "sortie"
+      category: values.category,                     // l'une des catégories
+      date: values.date.format("DD-MM-YYYY"),        // dd-mm-yyyy
+      reference: values.reference,                   // string
+      description: values.description || "",         // optionnel
+    };
+
+    setConfirmLoading(true);
+    try {
+      // Exemple d’envoi API (décommente et adapte l’URL + headers si besoin)
+      /*
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/v1/transactions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Erreur lors de la création");
+      }
+      */
+
+      // Si tout va bien:
+      setIsModalOpen(false);
+      form.resetFields();
+      // Tu peux rafraîchir tes stats ici si nécessaire
+    } catch (err) {
+      console.error(err);
+      // Affiche un message avec ta lib de toast si tu en utilises une
+      // ex: toast.error(err.message);
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const handleOk = () => {
+    form.submit(); // déclenche onFinish
   };
 
   // Données fictives
@@ -39,7 +97,6 @@ const Dashboard = () => {
   const totalCount = stats.revenusCount + stats.depensesCount;
   const revenusPourcent = Math.round((stats.revenusCount / totalCount) * 100);
   const depensesPourcent = Math.round((stats.depensesCount / totalCount) * 100);
-
   const totalMontant = stats.revenus + stats.depenses;
   const revenusMontantPourcent = Math.round((stats.revenus / totalMontant) * 100);
   const depensesMontantPourcent = Math.round((stats.depenses / totalMontant) * 100);
@@ -87,7 +144,7 @@ const Dashboard = () => {
               <FaChartPie className="mr-2" /> Graph
             </button>
             <button
-              onClick={openModal} // ⬅️ ouvre le modal
+              onClick={openModal}
               className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700"
             >
               <FaPlus className="mr-2" /> Nouvelle transaction
@@ -99,47 +156,23 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
           {/* Transactions */}
           <div className="p-6 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-bold">
-              Total Transactions : {stats.transactions}
-            </h2>
+            <h2 className="text-lg font-bold">Total Transactions : {stats.transactions}</h2>
             <p>Income : {stats.revenusCount}</p>
             <p>Expenses : {stats.depensesCount}</p>
             <div className="flex gap-6 mt-4">
-              <Progress
-                type="circle"
-                percent={revenusPourcent}
-                strokeColor="green"
-                format={() => `${revenusPourcent}%`}
-              />
-              <Progress
-                type="circle"
-                percent={depensesPourcent}
-                strokeColor="orange"
-                format={() => `${depensesPourcent}%`}
-              />
+              <Progress type="circle" percent={revenusPourcent} strokeColor="green" format={() => `${revenusPourcent}%`} />
+              <Progress type="circle" percent={depensesPourcent} strokeColor="orange" format={() => `${depensesPourcent}%`} />
             </div>
           </div>
 
           {/* Chiffre d'affaires */}
           <div className="p-6 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-bold">
-              Total Turnover : {totalMontant}
-            </h2>
+            <h2 className="text-lg font-bold">Total Turnover : {totalMontant}</h2>
             <p>Income : {stats.revenus}</p>
             <p>Expenses : {stats.depenses}</p>
             <div className="flex gap-6 mt-4">
-              <Progress
-                type="circle"
-                percent={revenusMontantPourcent}
-                strokeColor="green"
-                format={() => `${revenusMontantPourcent}%`}
-              />
-              <Progress
-                type="circle"
-                percent={depensesMontantPourcent}
-                strokeColor="orange"
-                format={() => `${depensesMontantPourcent}%`}
-              />
+              <Progress type="circle" percent={revenusMontantPourcent} strokeColor="green" format={() => `${revenusMontantPourcent}%`} />
+              <Progress type="circle" percent={depensesMontantPourcent} strokeColor="orange" format={() => `${depensesMontantPourcent}%`} />
             </div>
           </div>
         </div>
@@ -156,10 +189,7 @@ const Dashboard = () => {
                   <span>{cat.pourcentage}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded">
-                  <div
-                    className="h-2 bg-green-600 rounded"
-                    style={{ width: `${cat.pourcentage}%` }}
-                  ></div>
+                  <div className="h-2 bg-green-600 rounded" style={{ width: `${cat.pourcentage}%` }} />
                 </div>
               </div>
             ))}
@@ -175,10 +205,7 @@ const Dashboard = () => {
                   <span>{cat.pourcentage}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded">
-                  <div
-                    className="h-2 bg-orange-500 rounded"
-                    style={{ width: `${cat.pourcentage}%` }}
-                  ></div>
+                  <div className="h-2 bg-orange-500 rounded" style={{ width: `${cat.pourcentage}%` }} />
                 </div>
               </div>
             ))}
@@ -193,10 +220,83 @@ const Dashboard = () => {
           onCancel={handleCancel}
           okText="Valider"
           cancelText="Annuler"
+          confirmLoading={confirmLoading}
           destroyOnHidden
         >
-          {/* Contenu minimal — remplace par ton formulaire si besoin */}
-          <p>Ajoute ici le contenu de ton formulaire (montant, type, catégorie, date…)</p>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            requiredMark="optional"
+          >
+            <Form.Item
+              label="Montant"
+              name="montant"
+              rules={[{ required: true, message: "Le montant est requis" }]}
+            >
+              <Input placeholder="Ex: 1200.50" inputMode="decimal" />
+            </Form.Item>
+
+            <Form.Item
+              label="Type"
+              name="type"
+              rules={[{ required: true, message: "Le type est requis" }]}
+            >
+              <Select
+                placeholder="Sélectionner le type"
+                options={[
+                  { value: "entree", label: "Entrée" },
+                  { value: "sortie", label: "Sortie" },
+                ]}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Catégorie"
+              name="category"
+              rules={[{ required: true, message: "La catégorie est requise" }]}
+            >
+              <Select
+                placeholder="Sélectionner une catégorie"
+                options={[
+                  { value: "salaire", label: "Salaire" },
+                  { value: "freelance", label: "Freelance" },
+                  { value: "nourriture", label: "Nourriture" },
+                  { value: "entrainement", label: "Entrainement" },
+                  { value: "education", label: "Education" },
+                  { value: "medical", label: "Medical" },
+                  { value: "taxe", label: "Taxe" },
+                ]}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Date de la transaction"
+              name="date"
+              rules={[{ required: true, message: "La date est requise" }]}
+            >
+              <DatePicker
+                style={{ width: "100%" }}
+                format="DD-MM-YYYY"
+                placeholder="JJ-MM-AAAA"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Référence"
+              name="reference"
+              rules={[{ required: true, message: "La référence est requise" }]}
+            >
+              <Input placeholder="Ex: Fact-2025-001" />
+            </Form.Item>
+
+            <Form.Item
+              label="Description (optionnel)"
+              name="description"
+            >
+              <TextArea placeholder="Quelques détails..." rows={3} />
+            </Form.Item>
+          </Form>
         </Modal>
       </div>
     </DefaultLayout>
