@@ -1,11 +1,22 @@
+// src/pages/Dashboard.jsx
 import React, { useState } from "react";
 import { FaList, FaChartPie, FaPlus } from "react-icons/fa";
-import { Progress, Select } from "antd"; // ⬅️ antd Progress + Select
+import { Progress, Select, Modal } from "antd"; // ⬅️ ajout de Modal
 import DefaultLayout from "../components/DefaultLayout";
 
 const Dashboard = () => {
   const [frequence, setFrequence] = useState("7j");
   const [type, setType] = useState("all");
+
+  // État du modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const handleCancel = () => setIsModalOpen(false);
+  const handleOk = () => {
+    // TODO: envoyer la nouvelle transaction au backend ici
+    // ex: await fetch('/api/transactions', { method:'POST', body: JSON.stringify(payload) })
+    setIsModalOpen(false);
+  };
 
   // Données fictives
   const stats = {
@@ -42,7 +53,7 @@ const Dashboard = () => {
             <div>
               <label className="block mb-1 font-semibold">Select Frequency</label>
               <Select
-                defaultValue="7j"
+                value={frequence}
                 style={{ width: 150 }}
                 onChange={(value) => setFrequence(value)}
                 options={[
@@ -55,7 +66,7 @@ const Dashboard = () => {
             <div>
               <label className="block mb-1 font-semibold">Select Type</label>
               <Select
-                defaultValue="all"
+                value={type}
                 style={{ width: 150 }}
                 onChange={(value) => setType(value)}
                 options={[
@@ -75,7 +86,10 @@ const Dashboard = () => {
             <button className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700">
               <FaChartPie className="mr-2" /> Graph
             </button>
-            <button className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700">
+            <button
+              onClick={openModal} // ⬅️ ouvre le modal
+              className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700"
+            >
               <FaPlus className="mr-2" /> Nouvelle transaction
             </button>
           </div>
@@ -129,46 +143,61 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
         {/* Catégories */}
         <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
-            {/* Revenus */}
-            <div className="p-6 bg-white rounded-lg shadow">
+          {/* Revenus */}
+          <div className="p-6 bg-white rounded-lg shadow">
             <h2 className="mb-4 font-bold">Entrées par catégorie</h2>
             {stats.categoriesRevenus.map((cat, i) => (
-                <div key={i} className="mb-3">
+              <div key={i} className="mb-3">
                 <div className="flex justify-between">
-                    <span>{cat.nom}</span>
-                    <span>{cat.pourcentage}%</span>
+                  <span>{cat.nom}</span>
+                  <span>{cat.pourcentage}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded">
-                    <div
+                  <div
                     className="h-2 bg-green-600 rounded"
                     style={{ width: `${cat.pourcentage}%` }}
-                    ></div>
+                  ></div>
                 </div>
-                </div>
+              </div>
             ))}
-            </div>
+          </div>
 
-            {/* Dépenses */}
-            <div className="p-6 bg-white rounded-lg shadow">
+          {/* Dépenses */}
+          <div className="p-6 bg-white rounded-lg shadow">
             <h2 className="mb-4 font-bold">Sorties par catégorie</h2>
             {stats.categoriesDepenses.map((cat, i) => (
-                <div key={i} className="mb-3">
+              <div key={i} className="mb-3">
                 <div className="flex justify-between">
-                    <span>{cat.nom}</span>
-                    <span>{cat.pourcentage}%</span>
+                  <span>{cat.nom}</span>
+                  <span>{cat.pourcentage}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded">
-                    <div
+                  <div
                     className="h-2 bg-orange-500 rounded"
                     style={{ width: `${cat.pourcentage}%` }}
-                    ></div>
+                  ></div>
                 </div>
-                </div>
+              </div>
             ))}
-            </div>
+          </div>
         </div>
+
+        {/* Modal Nouvelle transaction */}
+        <Modal
+          title="Nouvelle transaction"
+          open={isModalOpen}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          okText="Valider"
+          cancelText="Annuler"
+          destroyOnClose
+        >
+          {/* Contenu minimal — remplace par ton formulaire si besoin */}
+          <p>Ajoute ici le contenu de ton formulaire (montant, type, catégorie, date…)</p>
+        </Modal>
       </div>
     </DefaultLayout>
   );
