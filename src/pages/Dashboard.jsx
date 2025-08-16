@@ -76,7 +76,7 @@ const Dashboard = () => {
               <FaChartPie className="mr-2" /> Graph
             </button>
             <button className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700">
-              <FaPlus className="mr-2" /> Add New
+              <FaPlus className="mr-2" /> Nouvelle transaction
             </button>
           </div>
         </div>
