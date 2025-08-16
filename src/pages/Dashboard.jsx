@@ -7,13 +7,21 @@ const Dashboard = () => {
   const [frequence, setFrequence] = useState("7j");
   const [type, setType] = useState("all");
 
-  // Données fictives (à remplacer plus tard par ton API)
+  // Données fictives
   const stats = {
     transactions: 3,
     revenus: 150000,
     depenses: 300,
     revenusCount: 2,
     depensesCount: 1,
+    categoriesRevenus: [
+      { nom: "Salaire", pourcentage: 90 },
+      { nom: "Freelance", pourcentage: 10 },
+    ],
+    categoriesDepenses: [
+      { nom: "Nourriture", pourcentage: 50 },
+      { nom: "Transport", pourcentage: 50 },
+    ],
   };
 
   // Calcul des pourcentages
