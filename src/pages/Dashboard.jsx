@@ -193,7 +193,7 @@ const Dashboard = () => {
           onCancel={handleCancel}
           okText="Valider"
           cancelText="Annuler"
-          destroyOnClose
+          destroyOnHidden
         >
           {/* Contenu minimal — remplace par ton formulaire si besoin */}
           <p>Ajoute ici le contenu de ton formulaire (montant, type, catégorie, date…)</p>
