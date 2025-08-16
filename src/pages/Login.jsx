@@ -45,6 +45,7 @@ const Login = () => {
       });
 
       const data = await res.json();
+      console.log('data', data);
 
       if (!res.ok) {
         toast.error(data.message || "Erreur lors de la connexion");
