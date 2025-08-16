@@ -51,18 +51,26 @@ const Login = () => {
         return;
       }
 
-      // On suppose que le backend renvoie { token, user }
-      if (!data?.token || !data?.user) {
-        toast.error("Réponse serveur invalide (token ou user manquant).");
+      // Le back renvoie un objet "plat" : { _id, firstName, lastName, email, token }
+      if (!data?.token || !data?._id) {
+        toast.error("Réponse serveur invalide (token ou _id manquant).");
         return;
       }
 
+      // Construire l'objet user pour le front
+      const userFromApi = {
+        _id: data._id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+      };
+
       // Persistance locale
       localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(userFromApi));
 
-      // ⚡️ Mise à jour immédiate du contexte -> évite la redirection vers /connexion
-      login(data.user);
+      // ⚡️ Mise à jour immédiate du contexte (évite le redirect loop)
+      login(userFromApi);
 
       toast.success("Connexion réussie !");
       navigate("/dashboard", { replace: true });
@@ -129,7 +137,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(s => !s)}
-                  className="absolute text-gray-500 cursor-pointer right-3 top-2.5 hover:text-gray-700"
+                  className="absolute text-gray-500 right-3 top-2.5 hover:text-gray-700"
                   aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
                 >
                   {showPassword ? '🙈' : '👁️'}
