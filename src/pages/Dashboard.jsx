@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaList, FaChartPie, FaPlus } from "react-icons/fa";
 import {
   Progress,
@@ -8,44 +8,109 @@ import {
   Form,
   Input,
   DatePicker,
+  Spin,
+  message,
 } from "antd";
 import DefaultLayout from "../components/DefaultLayout";
 
 const { TextArea } = Input;
 
-const Dashboard = () => {
-  const [frequence, setFrequence] = useState("7j");
-  const [type, setType] = useState("all");
+// CRA : .env ➜ REACT_APP_API_BASE_URL=http://localhost:5000
+// ou "proxy" dans package.json et laisse vide.
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
 
-  // Modal + Form state
+async function parseJsonSafe(res) {
+  const ct = res.headers.get("content-type") || "";
+  if (ct.includes("application/json")) return res.json();
+  const text = await res.text();
+  throw new Error(`Réponse non-JSON (${res.status}) : ${text.slice(0, 120)}…`);
+}
+
+const Dashboard = () => {
+  const [frequence, setFrequence] = useState("7j"); // "7j" | "30j" | "365j"
+  const [loading, setLoading] = useState(true);
+
+  // Données du résumé API
+  const [summary, setSummary] = useState({
+    total: 0,
+    revenusCount: 0,
+    depensesCount: 0,
+    revenus: 0,
+    depenses: 0,
+    totalMontant: 0,
+    categoriesRevenus: [],
+    categoriesDepenses: [],
+  });
+
+  // Modal + Form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
 
+  const fetchSummary = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const url = `${API_BASE}/api/v1/transactions/summary?freq=${frequence}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await parseJsonSafe(res);
+      if (!res.ok) throw new Error(data.message || "Erreur lors du chargement");
+      setSummary({
+        total: data.total || 0,
+        revenusCount: data.revenusCount || 0,
+        depensesCount: data.depensesCount || 0,
+        revenus: data.revenus || 0,
+        depenses: data.depenses || 0,
+        totalMontant: data.totalMontant || 0,
+        categoriesRevenus: data.categoriesRevenus || [],
+        categoriesDepenses: data.categoriesDepenses || [],
+      });
+    } catch (e) {
+      console.error(e);
+      message.error(e.message || "Erreur réseau");
+      setSummary({
+        total: 0,
+        revenusCount: 0,
+        depensesCount: 0,
+        revenus: 0,
+        depenses: 0,
+        totalMontant: 0,
+        categoriesRevenus: [],
+        categoriesDepenses: [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frequence]);
+
+  // Modal handlers
   const openModal = () => setIsModalOpen(true);
   const handleCancel = () => {
     setIsModalOpen(false);
     form.resetFields();
   };
 
-  // Soumission du formulaire (clic sur "Valider")
   const onFinish = async (values) => {
-    // Adapter ici le mapping pour ton backend
     const payload = {
-      montant: values.montant,                       // string (texte)
-      type: values.type,                             // "entree" | "sortie"
-      category: values.category,                     // l'une des catégories
-      date: values.date.format("DD-MM-YYYY"),        // dd-mm-yyyy
-      reference: values.reference,                   // string
-      description: values.description || "",         // optionnel
+      montant: values.montant,
+      type: values.type, // "entree" | "sortie"
+      category: values.category,
+      date: values.date.format("DD-MM-YYYY"),
+      reference: values.reference,
+      description: values.description || "",
     };
 
     setConfirmLoading(true);
     try {
-      // Exemple d’envoi API (décommente et adapte l’URL + headers si besoin)
-      /*
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/api/v1/transactions", {
+      const res = await fetch(`${API_BASE}/api/v1/transactions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,53 +118,21 @@ const Dashboard = () => {
         },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Erreur lors de la création");
-      }
-      */
-
-      // Si tout va bien:
+      const data = await parseJsonSafe(res);
+      if (!res.ok) throw new Error(data.message || "Erreur lors de la création");
+      message.success("Transaction créée");
       setIsModalOpen(false);
       form.resetFields();
-      // Tu peux rafraîchir tes stats ici si nécessaire
+      fetchSummary(); // rafraîchit les cartes
     } catch (err) {
       console.error(err);
-      // Affiche un message avec ta lib de toast si tu en utilises une
-      // ex: toast.error(err.message);
+      message.error(err.message || "Erreur serveur");
     } finally {
       setConfirmLoading(false);
     }
   };
 
-  const handleOk = () => {
-    form.submit(); // déclenche onFinish
-  };
-
-  // Données fictives
-  const stats = {
-    transactions: 3,
-    revenus: 150000,
-    depenses: 300,
-    revenusCount: 2,
-    depensesCount: 1,
-    categoriesRevenus: [
-      { nom: "Salaire", pourcentage: 90 },
-      { nom: "Freelance", pourcentage: 10 },
-    ],
-    categoriesDepenses: [
-      { nom: "Nourriture", pourcentage: 50 },
-      { nom: "Transport", pourcentage: 50 },
-    ],
-  };
-
-  // Calcul des pourcentages
-  const totalCount = stats.revenusCount + stats.depensesCount;
-  const revenusPourcent = Math.round((stats.revenusCount / totalCount) * 100);
-  const depensesPourcent = Math.round((stats.depensesCount / totalCount) * 100);
-  const totalMontant = stats.revenus + stats.depenses;
-  const revenusMontantPourcent = Math.round((stats.revenus / totalMontant) * 100);
-  const depensesMontantPourcent = Math.round((stats.depenses / totalMontant) * 100);
+  const handleOk = () => form.submit();
 
   return (
     <DefaultLayout>
@@ -112,7 +145,7 @@ const Dashboard = () => {
               <Select
                 value={frequence}
                 style={{ width: 150 }}
-                onChange={(value) => setFrequence(value)}
+                onChange={setFrequence}
                 options={[
                   { value: "7j", label: "Last 1 Week" },
                   { value: "30j", label: "Last 1 Month" },
@@ -120,19 +153,8 @@ const Dashboard = () => {
                 ]}
               />
             </div>
-            <div>
-              <label className="block mb-1 font-semibold">Select Type</label>
-              <Select
-                value={type}
-                style={{ width: 150 }}
-                onChange={(value) => setType(value)}
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "revenus", label: "Income" },
-                  { value: "depenses", label: "Expenses" },
-                ]}
-              />
-            </div>
+
+            {/* Tu pourras ajouter d'autres filtres ici si besoin */}
           </div>
 
           {/* Boutons d’action */}
@@ -152,65 +174,150 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Statistiques principales */}
-        <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
-          {/* Transactions */}
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-bold">Total Transactions : {stats.transactions}</h2>
-            <p>Income : {stats.revenusCount}</p>
-            <p>Expenses : {stats.depensesCount}</p>
-            <div className="flex gap-6 mt-4">
-              <Progress type="circle" percent={revenusPourcent} strokeColor="green" format={() => `${revenusPourcent}%`} />
-              <Progress type="circle" percent={depensesPourcent} strokeColor="orange" format={() => `${depensesPourcent}%`} />
-            </div>
+        {/* Contenu */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Spin />
           </div>
-
-          {/* Chiffre d'affaires */}
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h2 className="text-lg font-bold">Total Turnover : {totalMontant}</h2>
-            <p>Income : {stats.revenus}</p>
-            <p>Expenses : {stats.depenses}</p>
-            <div className="flex gap-6 mt-4">
-              <Progress type="circle" percent={revenusMontantPourcent} strokeColor="green" format={() => `${revenusMontantPourcent}%`} />
-              <Progress type="circle" percent={depensesMontantPourcent} strokeColor="orange" format={() => `${depensesMontantPourcent}%`} />
-            </div>
-          </div>
-        </div>
-
-        {/* Catégories */}
-        <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
-          {/* Revenus */}
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h2 className="mb-4 font-bold">Entrées par catégorie</h2>
-            {stats.categoriesRevenus.map((cat, i) => (
-              <div key={i} className="mb-3">
-                <div className="flex justify-between">
-                  <span>{cat.nom}</span>
-                  <span>{cat.pourcentage}%</span>
-                </div>
-                <div className="w-full h-2 bg-gray-200 rounded">
-                  <div className="h-2 bg-green-600 rounded" style={{ width: `${cat.pourcentage}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Dépenses */}
-          <div className="p-6 bg-white rounded-lg shadow">
-            <h2 className="mb-4 font-bold">Sorties par catégorie</h2>
-            {stats.categoriesDepenses.map((cat, i) => (
-              <div key={i} className="mb-3">
-                <div className="flex justify-between">
-                  <span>{cat.nom}</span>
-                  <span>{cat.pourcentage}%</span>
-                </div>
-                <div className="w-full h-2 bg-gray-200 rounded">
-                  <div className="h-2 bg-orange-500 rounded" style={{ width: `${cat.pourcentage}%` }} />
+        ) : (
+          <>
+            {/* Statistiques principales */}
+            <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
+              {/* Transactions */}
+              <div className="p-6 bg-white rounded-lg shadow">
+                <h2 className="text-lg font-bold">
+                  Total Transactions : {summary.total}
+                </h2>
+                <p>Entrée(s) : {summary.revenusCount}</p>
+                <p>Sortie(s) : {summary.depensesCount}</p>
+                <div className="flex gap-6 mt-4">
+                  <Progress
+                    type="circle"
+                    percent={
+                      summary.total > 0
+                        ? Math.round((summary.revenusCount / summary.total) * 100)
+                        : 0
+                    }
+                    strokeColor="green"
+                    format={() =>
+                      `${
+                        summary.total > 0
+                          ? Math.round((summary.revenusCount / summary.total) * 100)
+                          : 0
+                      }%`
+                    }
+                  />
+                  <Progress
+                    type="circle"
+                    percent={
+                      summary.total > 0
+                        ? Math.round((summary.depensesCount / summary.total) * 100)
+                        : 0
+                    }
+                    strokeColor="orange"
+                    format={() =>
+                      `${
+                        summary.total > 0
+                          ? Math.round((summary.depensesCount / summary.total) * 100)
+                          : 0
+                      }%`
+                    }
+                  />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+
+              {/* Chiffre d'affaires */}
+              <div className="p-6 bg-white rounded-lg shadow">
+                <h2 className="text-lg font-bold">
+                  Total Turnover : {summary.totalMontant}
+                </h2>
+                <p>Entrée(s) : {summary.revenus}</p>
+                <p>Sortie(s) : {summary.depenses}</p>
+                <div className="flex gap-6 mt-4">
+                  <Progress
+                    type="circle"
+                    percent={
+                      summary.totalMontant > 0
+                        ? Math.round((summary.revenus / summary.totalMontant) * 100)
+                        : 0
+                    }
+                    strokeColor="green"
+                    format={() =>
+                      `${
+                        summary.totalMontant > 0
+                          ? Math.round((summary.revenus / summary.totalMontant) * 100)
+                          : 0
+                      }%`
+                    }
+                  />
+                  <Progress
+                    type="circle"
+                    percent={
+                      summary.totalMontant > 0
+                        ? Math.round((summary.depenses / summary.totalMontant) * 100)
+                        : 0
+                    }
+                    strokeColor="orange"
+                    format={() =>
+                      `${
+                        summary.totalMontant > 0
+                          ? Math.round((summary.depenses / summary.totalMontant) * 100)
+                          : 0
+                      }%`
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Catégories */}
+            <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
+              {/* Entrées */}
+              <div className="p-6 bg-white rounded-lg shadow">
+                <h2 className="mb-4 font-bold">Entrées par catégorie</h2>
+                {summary.categoriesRevenus.length === 0 && (
+                  <p className="text-sm text-gray-500">Aucune entrée</p>
+                )}
+                {summary.categoriesRevenus.map((cat, i) => (
+                  <div key={i} className="mb-3">
+                    <div className="flex justify-between">
+                      <span>{cat.nom}</span>
+                      <span>{cat.pourcentage}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded">
+                      <div
+                        className="h-2 bg-green-600 rounded"
+                        style={{ width: `${cat.pourcentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Sorties */}
+              <div className="p-6 bg-white rounded-lg shadow">
+                <h2 className="mb-4 font-bold">Sorties par catégorie</h2>
+                {summary.categoriesDepenses.length === 0 && (
+                  <p className="text-sm text-gray-500">Aucune dépense</p>
+                )}
+                {summary.categoriesDepenses.map((cat, i) => (
+                  <div key={i} className="mb-3">
+                    <div className="flex justify-between">
+                      <span>{cat.nom}</span>
+                      <span>{cat.pourcentage}%</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded">
+                      <div
+                        className="h-2 bg-orange-500 rounded"
+                        style={{ width: `${cat.pourcentage}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Modal Nouvelle transaction */}
         <Modal
@@ -223,25 +330,11 @@ const Dashboard = () => {
           confirmLoading={confirmLoading}
           destroyOnHidden
         >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={onFinish}
-            requiredMark="optional"
-          >
-            <Form.Item
-              label="Montant"
-              name="montant"
-              rules={[{ required: true, message: "Le montant est requis" }]}
-            >
+          <Form form={form} layout="vertical" onFinish={onFinish} requiredMark="optional">
+            <Form.Item label="Montant" name="montant" rules={[{ required: true, message: "Le montant est requis" }]}>
               <Input placeholder="Ex: 1200.50" inputMode="decimal" />
             </Form.Item>
-
-            <Form.Item
-              label="Type"
-              name="type"
-              rules={[{ required: true, message: "Le type est requis" }]}
-            >
+            <Form.Item label="Type" name="type" rules={[{ required: true, message: "Le type est requis" }]}>
               <Select
                 placeholder="Sélectionner le type"
                 options={[
@@ -250,12 +343,7 @@ const Dashboard = () => {
                 ]}
               />
             </Form.Item>
-
-            <Form.Item
-              label="Catégorie"
-              name="category"
-              rules={[{ required: true, message: "La catégorie est requise" }]}
-            >
+            <Form.Item label="Catégorie" name="category" rules={[{ required: true, message: "La catégorie est requise" }]}>
               <Select
                 placeholder="Sélectionner une catégorie"
                 options={[
@@ -269,31 +357,13 @@ const Dashboard = () => {
                 ]}
               />
             </Form.Item>
-
-            <Form.Item
-              label="Date de la transaction"
-              name="date"
-              rules={[{ required: true, message: "La date est requise" }]}
-            >
-              <DatePicker
-                style={{ width: "100%" }}
-                format="DD-MM-YYYY"
-                placeholder="JJ-MM-AAAA"
-              />
+            <Form.Item label="Date de la transaction" name="date" rules={[{ required: true, message: "La date est requise" }]}>
+              <DatePicker style={{ width: "100%" }} format="DD-MM-YYYY" placeholder="JJ-MM-AAAA" />
             </Form.Item>
-
-            <Form.Item
-              label="Référence"
-              name="reference"
-              rules={[{ required: true, message: "La référence est requise" }]}
-            >
+            <Form.Item label="Référence" name="reference" rules={[{ required: true, message: "La référence est requise" }]}>
               <Input placeholder="Ex: Fact-2025-001" />
             </Form.Item>
-
-            <Form.Item
-              label="Description (optionnel)"
-              name="description"
-            >
+            <Form.Item label="Description (optionnel)" name="description">
               <TextArea placeholder="Quelques détails..." rows={3} />
             </Form.Item>
           </Form>
