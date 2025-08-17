@@ -15,9 +15,9 @@ import DefaultLayout from "../components/DefaultLayout";
 
 const { TextArea } = Input;
 
-// CRA : .env ➜ REACT_APP_API_BASE_URL=http://localhost:5000
-// ou "proxy" dans package.json et laisse vide.
-const API_BASE = process.env.REACT_APP_API_BASE_URL || "";
+// 🔧 Forçage temporaire vers l'API back (port 5000)
+// (Quand tout marche, remets process.env.REACT_APP_API_BASE_URL ou le proxy CRA)
+const API_BASE = "http://localhost:5000";
 
 async function parseJsonSafe(res) {
   const ct = res.headers.get("content-type") || "";
@@ -29,8 +29,6 @@ async function parseJsonSafe(res) {
 const Dashboard = () => {
   const [frequence, setFrequence] = useState("7j"); // "7j" | "30j" | "365j"
   const [loading, setLoading] = useState(true);
-
-  // Données du résumé API
   const [summary, setSummary] = useState({
     total: 0,
     revenusCount: 0,
@@ -90,7 +88,6 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frequence]);
 
-  // Modal handlers
   const openModal = () => setIsModalOpen(true);
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -123,7 +120,7 @@ const Dashboard = () => {
       message.success("Transaction créée");
       setIsModalOpen(false);
       form.resetFields();
-      fetchSummary(); // rafraîchit les cartes
+      fetchSummary();
     } catch (err) {
       console.error(err);
       message.error(err.message || "Erreur serveur");
@@ -153,8 +150,6 @@ const Dashboard = () => {
                 ]}
               />
             </div>
-
-            {/* Tu pourras ajouter d'autres filtres ici si besoin */}
           </div>
 
           {/* Boutons d’action */}
