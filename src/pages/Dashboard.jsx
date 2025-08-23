@@ -182,9 +182,9 @@ const Dashboard = () => {
                 style={{ width: 150 }}
                 onChange={setFrequence}
                 options={[
-                  { value: "7j", label: "Last 1 Week" },
-                  { value: "30j", label: "Last 1 Month" },
-                  { value: "365j", label: "Last 1 Year" },
+                  { value: "7j", label: "La dernière semaine" },
+                  { value: "30j", label: "Le dernier mois" },
+                  { value: "365j", label: "La dernière année" },
                 ]}
               />
             </div>
