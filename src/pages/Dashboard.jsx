@@ -15,9 +15,11 @@ import DefaultLayout from "../components/DefaultLayout";
 
 const { TextArea } = Input;
 
-// 🔧 Forçage temporaire vers l'API back (port 5000)
-// (Quand tout marche, remets process.env.REACT_APP_API_BASE_URL ou le proxy CRA)
+// Pointe vers ton back (ou utilise le proxy CRA)
 const API_BASE = "http://localhost:5000";
+
+// helpers
+const sum = (arr) => arr.reduce((acc, n) => acc + Number(n || 0), 0);
 
 async function parseJsonSafe(res) {
   const ct = res.headers.get("content-type") || "";
@@ -26,9 +28,26 @@ async function parseJsonSafe(res) {
   throw new Error(`Réponse non-JSON (${res.status}) : ${text.slice(0, 120)}…`);
 }
 
+function breakdownByCategory(list, type) {
+  const only = list.filter((t) => t.type === type);
+  const total = sum(only.map((t) => t.montant));
+  const map = new Map();
+  for (const t of only) {
+    const k = t.category || "autre";
+    map.set(k, (map.get(k) || 0) + Number(t.montant || 0));
+  }
+  return Array.from(map.entries())
+    .map(([nom, montant]) => ({
+      nom,
+      pourcentage: total > 0 ? Math.round((montant / total) * 100) : 0,
+    }))
+    .sort((a, b) => b.pourcentage - a.pourcentage);
+}
+
 const Dashboard = () => {
   const [frequence, setFrequence] = useState("7j"); // "7j" | "30j" | "365j"
   const [loading, setLoading] = useState(true);
+
   const [summary, setSummary] = useState({
     total: 0,
     revenusCount: 0,
@@ -45,25 +64,42 @@ const Dashboard = () => {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [form] = Form.useForm();
 
-  const fetchSummary = async () => {
+  // 👉 on consomme /transactions et on calcule les stats
+  const fetchFromList = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const url = `${API_BASE}/api/v1/transactions/summary?freq=${frequence}`;
+
+      // prends la période côté API (ton controller supporte freq)
+      const url = `${API_BASE}/api/v1/transactions?freq=${frequence}&limit=1000&page=1&sort=-date`;
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.message || "Erreur lors du chargement");
+
+      const tx = Array.isArray(data.transactions) ? data.transactions : [];
+      const total = typeof data.total === "number" ? data.total : tx.length;
+
+      const revenusList = tx.filter((t) => t.type === "entree");
+      const depensesList = tx.filter((t) => t.type === "sortie");
+
+      const revenusCount = revenusList.length;     // 👈 nombre de "type: entree"
+      const depensesCount = depensesList.length;   // 👈 nombre de "type: sortie"
+
+      const revenus = sum(revenusList.map((t) => t.montant));
+      const depenses = sum(depensesList.map((t) => t.montant));
+      const totalMontant = revenus + depenses;
+
       setSummary({
-        total: data.total || 0,
-        revenusCount: data.revenusCount || 0,
-        depensesCount: data.depensesCount || 0,
-        revenus: data.revenus || 0,
-        depenses: data.depenses || 0,
-        totalMontant: data.totalMontant || 0,
-        categoriesRevenus: data.categoriesRevenus || [],
-        categoriesDepenses: data.categoriesDepenses || [],
+        total,
+        revenusCount,
+        depensesCount,
+        revenus,
+        depenses,
+        totalMontant,
+        categoriesRevenus: breakdownByCategory(tx, "entree"),
+        categoriesDepenses: breakdownByCategory(tx, "sortie"),
       });
     } catch (e) {
       console.error(e);
@@ -84,7 +120,7 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchSummary();
+    fetchFromList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [frequence]);
 
@@ -117,10 +153,12 @@ const Dashboard = () => {
       });
       const data = await parseJsonSafe(res);
       if (!res.ok) throw new Error(data.message || "Erreur lors de la création");
+
       message.success("Transaction créée");
       setIsModalOpen(false);
       form.resetFields();
-      fetchSummary();
+      // on recharge la liste puis recalcule les stats
+      fetchFromList();
     } catch (err) {
       console.error(err);
       message.error(err.message || "Erreur serveur");
@@ -181,6 +219,7 @@ const Dashboard = () => {
               {/* Transactions */}
               <div className="p-6 bg-white rounded-lg shadow">
                 <h2 className="text-lg font-bold">
+                  {/* 👇 total vient directement de l'API /transactions */}
                   Total Transactions : {summary.total}
                 </h2>
                 <p>Entrée(s) : {summary.revenusCount}</p>
