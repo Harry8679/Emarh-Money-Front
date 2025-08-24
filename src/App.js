@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { AuthProvider } from "./context/AuthContext";
+import TransactionsList from "./pages/TransactionsList";
 
 function App() {
   return (
