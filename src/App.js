@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import { AuthProvider } from "./context/AuthContext";
 import TransactionsList from "./pages/TransactionsList";
+import TransactionsCharts from "./pages/TransactionsCharts";
 
 function App() {
   return (
