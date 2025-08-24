@@ -15,7 +15,6 @@ import {
 import DefaultLayout from "../components/DefaultLayout";
 
 const { TextArea } = Input;
-const navigate = useNavigate();
 
 // Pointe vers ton back (ou utilise le proxy CRA)
 const API_BASE = "http://localhost:5000";
@@ -49,6 +48,7 @@ function breakdownByCategory(list, type) {
 const Dashboard = () => {
   const [frequence, setFrequence] = useState("7j"); // "7j" | "30j" | "365j"
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const [summary, setSummary] = useState({
     total: 0,
