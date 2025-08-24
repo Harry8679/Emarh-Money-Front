@@ -200,8 +200,11 @@ const Dashboard = () => {
                 >
                 <FaList className="mr-2" /> Liste
             </button>
-            <button className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700">
-              <FaChartPie className="mr-2" /> Graph
+            <button
+                onClick={() => navigate(`/graphs?freq=${frequence}`)}
+                className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700"
+                >
+                <FaChartPie className="mr-2" /> Graph
             </button>
             <button
               onClick={openModal}
