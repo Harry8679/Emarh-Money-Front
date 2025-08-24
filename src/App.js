@@ -16,6 +16,8 @@ function App() {
           <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
           <Route path="/inscription" element={<PublicRoute><Register /></PublicRoute>} />
           <Route path="/connexion" element={<PublicRoute><Login /></PublicRoute>} />
+          <Route path="/transactions" element={<ProtectedRoute><TransactionsList /></ProtectedRoute>} />
+          <Route path="/graphs" element={<ProtectedRoute><TransactionsCharts /></ProtectedRoute>} />
 
           {/* Routes privées accessibles seulement si connecté */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
