@@ -1,5 +1,6 @@
 // src/pages/Dashboard.jsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaList, FaChartPie, FaPlus } from "react-icons/fa";
 import {
   Progress,
@@ -14,6 +15,7 @@ import {
 import DefaultLayout from "../components/DefaultLayout";
 
 const { TextArea } = Input;
+const navigate = useNavigate();
 
 // Pointe vers ton back (ou utilise le proxy CRA)
 const API_BASE = "http://localhost:5000";
@@ -192,8 +194,11 @@ const Dashboard = () => {
 
           {/* Boutons d’action */}
           <div className="flex gap-3">
-            <button className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700">
-              <FaList className="mr-2" /> Liste
+            <button
+                onClick={() => navigate(`/transactions?freq=${frequence}`)}
+                className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700"
+                >
+                <FaList className="mr-2" /> Liste
             </button>
             <button className="flex items-center px-4 py-2 text-white bg-blue-900 rounded-lg shadow hover:bg-blue-700">
               <FaChartPie className="mr-2" /> Graph
